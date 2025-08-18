@@ -1,41 +1,39 @@
 import { Metadata } from "next"
 
-import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
-import { listCollections } from "@lib/data/collections"
+import ExploreCategories from "@modules/home/components/explore-categories"
+import PopularProducts from "@modules/home/components/popular-products"
 import { getRegion } from "@lib/data/regions"
 
 export const metadata: Metadata = {
-  title: "Medusa Next.js Starter Template",
+  title: "Shopvora - Your Ultimate Shopping Destination",
   description:
-    "A performant frontend ecommerce starter template with Next.js 15 and Medusa.",
+    "Discover amazing products across all categories with the best deals and offers. Shop the latest trends in fashion, electronics, home & more.",
 }
 
 export default async function Home(props: {
   params: Promise<{ countryCode: string }>
 }) {
   const params = await props.params
-
   const { countryCode } = params
-
   const region = await getRegion(countryCode)
 
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
-
-  if (!collections || !region) {
+  if (!region) {
     return null
   }
 
   return (
     <>
       <Hero />
-      <div className="py-12">
-        <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
-        </ul>
-      </div>
+      {/* ExploreCategories - Commented Out */}
+      {/*
+      <ExploreCategories />
+      */}
+      
+      {/* PopularProducts - Commented Out */}
+      {/*
+      <PopularProducts region={region} />
+      */}
     </>
   )
 }
