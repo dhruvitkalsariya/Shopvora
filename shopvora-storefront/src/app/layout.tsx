@@ -732,9 +732,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           async
         />
       </head>
-      <body>
+      <body className="antialiased">
         <LanguageProvider>
-          <main className="relative">{props.children}</main>
+          <main className="relative min-h-screen">{props.children}</main>
         </LanguageProvider>
       </body>
     </html>

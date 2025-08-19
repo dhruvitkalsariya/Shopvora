@@ -19,7 +19,9 @@
 
   input:focus ~ label,
   input:not(:placeholder-shown) ~ label {
-    @apply -translate-y-2 text-xsmall-regular;
+    font-size: 10px;
+    font-weight: 400;
+    @apply -translate-y-2 leading-4;
   }
 
   input:focus ~ label {
@@ -51,63 +53,195 @@
 
 @layer components {
   .content-container {
-    @apply max-w-[1440px] w-full mx-auto px-6;
+    max-width: 1440px;
+    @apply w-full mx-auto px-6;
   }
 
   .contrast-btn {
-    @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
+    @apply px-4 py-2 border border-black rounded-full transition-colors duration-200 ease-in;
+  }
+
+  .contrast-btn:hover {
+    @apply bg-black text-white;
   }
 
   .text-xsmall-regular {
-    @apply text-[10px] leading-4 font-normal;
+    font-size: 10px;
+    font-weight: 400;
+    @apply leading-4;
   }
 
   .text-small-regular {
-    @apply text-xs leading-5 font-normal;
+    font-weight: 400;
+    @apply text-xs leading-5;
   }
 
   .text-small-semi {
-    @apply text-xs leading-5 font-semibold;
+    font-weight: 600;
+    @apply text-xs leading-5;
   }
 
   .text-base-regular {
-    @apply text-sm leading-6 font-normal;
+    font-weight: 400;
+    @apply text-sm leading-6;
   }
 
   .text-base-semi {
-    @apply text-sm leading-6 font-semibold;
+    font-weight: 600;
+    @apply text-sm leading-6;
   }
 
   .text-large-regular {
-    @apply text-base leading-6 font-normal;
+    font-weight: 400;
+    @apply text-base leading-6;
   }
 
   .text-large-semi {
-    @apply text-base leading-6 font-semibold;
+    font-weight: 600;
+    @apply text-base leading-6;
   }
 
   .text-xl-regular {
-    @apply text-2xl leading-[36px] font-normal;
+    font-weight: 400;
+    @apply text-2xl;
+    line-height: 36px;
   }
 
   .text-xl-semi {
-    @apply text-2xl leading-[36px] font-semibold;
+    font-weight: 600;
+    @apply text-2xl;
+    line-height: 36px;
   }
 
   .text-2xl-regular {
-    @apply text-[30px] leading-[48px] font-normal;
+    font-size: 30px;
+    line-height: 48px;
+    font-weight: 400;
+  }
+
+  /* Navigation specific styles */
+  .nav-container {
+    max-width: 1440px;
+    @apply mx-auto;
+  }
+
+  .nav-categories {
+    @apply flex items-center space-x-8 py-3;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .nav-categories::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ensure proper 1440px layout */
+  @media (min-width: 1440px) {
+    .nav-container {
+      max-width: 1440px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* Ensure navigation works perfectly at 1440px */
+    .nav-categories {
+      justify-content: flex-start;
+      flex-wrap: nowrap;
+    }
+    
+    .nav-category-item {
+      flex-shrink: 0;
+    }
+  }
+
+  /* Responsive breakpoints for navigation */
+  @media (max-width: 1439px) {
+    .nav-categories {
+      justify-content: flex-start;
+      overflow-x: auto;
+    }
+  }
+
+  .nav-category-item {
+    @apply relative flex-shrink-0;
+  }
+
+  .nav-dropdown {
+    @apply absolute top-full left-0 mt-1 bg-white rounded-md shadow-lg py-2 z-50 border border-gray-200;
+    animation: slideInFromTop 0.2s ease-out;
+  }
+
+  .nav-submenu {
+    @apply absolute left-full top-0 ml-1 bg-white rounded-md shadow-lg py-2 border border-gray-200;
+    animation: slideInFromLeft 0.2s ease-out;
+  }
+
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Hide scrollbar for webkit browsers */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Chevron animation styles */
+  .chevron-animate {
+    display: inline-block;
+    transform-origin: center;
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .subcategory-chevron {
+    display: inline-block;
+    transform-origin: center;
+    transition: transform 0.2s ease-in-out;
+  }
+
+  /* Navigation button styles */
+  .nav-category-button {
+    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
   }
 
   .text-2xl-semi {
-    @apply text-[30px] leading-[48px] font-semibold;
+    font-size: 30px;
+    line-height: 48px;
+    font-weight: 600;
   }
 
   .text-3xl-regular {
-    @apply text-[32px] leading-[44px] font-normal;
+    font-size: 32px;
+    line-height: 44px;
+    font-weight: 400;
   }
 
   .text-3xl-semi {
-    @apply text-[32px] leading-[44px] font-semibold;
+    font-size: 32px;
+    line-height: 44px;
+    font-weight: 600;
   }
 
   /* Custom animations for Shopvora */
@@ -123,12 +257,64 @@
     animation: bounce 2s infinite;
   }
 
+  /* Navbar animations */
+  .animate-in {
+    animation: animateIn 0.2s ease-out;
+  }
+
+  .slide-in-from-top-2 {
+    animation: slideInFromTop 0.2s ease-out;
+  }
+
+  .slide-in-from-left-2 {
+    animation: slideInFromLeft 0.2s ease-out;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
   @keyframes float {
     0%, 100% {
       transform: translateY(0px);
     }
     50% {
       transform: translateY(-20px);
+    }
+  }
+
+  @keyframes animateIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
 

@@ -1,8 +1,7 @@
 import { Metadata } from "next"
 
-import Hero from "@modules/home/components/hero"
+import PromotionalCarouselWrapper from "@modules/home/components/promotional-carousel/page-wrapper"
 import ExploreCategories from "@modules/home/components/explore-categories"
-import PopularProducts from "@modules/home/components/popular-products"
 import { getRegion } from "@lib/data/regions"
 
 export const metadata: Metadata = {
@@ -24,16 +23,8 @@ export default async function Home(props: {
 
   return (
     <>
-      <Hero />
-      {/* ExploreCategories - Commented Out */}
-      {/*
+      <PromotionalCarouselWrapper />
       <ExploreCategories />
-      */}
-      
-      {/* PopularProducts - Commented Out */}
-      {/*
-      <PopularProducts region={region} />
-      */}
     </>
   )
 }

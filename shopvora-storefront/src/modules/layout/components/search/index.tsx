@@ -270,7 +270,7 @@ export default function SearchComponent() {
   const shouldShowPopularSearches = isFocused && !query.trim() && results.suggestions.length === 0
 
   return (
-    <div className="flex-1 max-w-2xl mx-6" ref={searchRef}>
+    <div className="w-full" ref={searchRef} onClick={(e) => e.stopPropagation()}>
       <div className="relative">
         <input
           ref={inputRef}
@@ -282,6 +282,7 @@ export default function SearchComponent() {
               setQuery(e.target.value)
             }
           }}
+          onClick={(e) => e.stopPropagation()}
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={handleBlur}
