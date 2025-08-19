@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { Metadata } from "next"
 
 import { listProducts } from "@lib/data/products"
@@ -26,8 +26,9 @@ export default async function SearchPage(props: Props) {
   const { countryCode } = await props.params
   const { q, page = "1" } = await props.searchParams
 
+  // If no search query, redirect to home page instead of showing 404
   if (!q?.trim()) {
-    notFound()
+    redirect(`/${countryCode}`)
   }
 
   const region = await getRegion(countryCode)
@@ -56,9 +57,17 @@ export default async function SearchPage(props: Props) {
   return (
     <div className="content-container py-12 small:py-24">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Search Results for "{q}"
-        </h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Search Results for "{q}"
+          </h1>
+          <a
+            href={`/${countryCode}`}
+            className="text-[#2A1454] hover:underline text-sm font-medium"
+          >
+            ← Back to Home
+          </a>
+        </div>
         <p className="text-gray-600">
           {count} {count === 1 ? "product" : "products"} found
         </p>
@@ -72,7 +81,7 @@ export default async function SearchPage(props: Props) {
               Try searching with different keywords or browse our categories
             </div>
           </div>
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center space-x-4 mb-6">
             <a
               href="/categories/mobiles"
               className="text-[#2A1454] hover:underline"
@@ -92,6 +101,12 @@ export default async function SearchPage(props: Props) {
               Browse Electronics
             </a>
           </div>
+          <a
+            href={`/${countryCode}`}
+            className="inline-block bg-[#2A1454] text-white px-6 py-2 rounded-lg hover:bg-[#1a0f3a] transition-colors"
+          >
+            Back to Home
+          </a>
         </div>
       ) : (
         <>

@@ -1,12 +1,16 @@
 "use client"
 
 import { Suspense, useEffect, useState } from "react"
-import { ShoppingCart, User, ChevronDown } from "lucide-react"
+import { ShoppingCart } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import Logo from "@modules/common/components/logo"
 import SearchComponent from "@modules/layout/components/search"
+import UserDropdown from "@modules/layout/components/user-dropdown"
+import Notifications from "@modules/layout/components/notifications"
+import { useCustomer } from "@lib/hooks/use-customer"
+
 
 const categories = [
   { name: "Grocery", href: "/categories/grocery" },
@@ -41,14 +45,43 @@ const categories = [
 export default function Nav() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null)
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
+  const [mounted, setMounted] = useState(false)
+  const { customer, isLoggedIn, isLoading } = useCustomer()
 
+
+  // Fix hydration error by ensuring component is mounted
   useEffect(() => {
-    // Simple auth check via cookie set by Medusa backend
-    if (typeof document !== "undefined") {
-      setIsLoggedIn(document.cookie.includes("_medusa_jwt="))
-    }
+    setMounted(true)
   }, [])
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="sticky top-0 inset-x-0 z-50">
+        <header className="relative bg-white border-b border-gray-200 shadow-sm w-full">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center min-w-[160px]">
+                <Logo size="lg" className="h-10" />
+              </div>
+              <div className="flex-1 max-w-2xl mx-6">
+                <div className="relative">
+                  <div className="w-full pl-10 pr-10 py-2 rounded-lg border placeholder-gray-500 text-sm bg-gray-100 animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </header>
+      </div>
+    )
+  }
 
   return (
     <div className="sticky top-0 inset-x-0 z-50">
@@ -64,55 +97,56 @@ export default function Nav() {
             {/* Search Component */}
             <SearchComponent />
 
-            {/* Right Actions */}
-            <div className="flex items-center space-x-4">
-              {!isLoggedIn && (
-                <LocalizedClientLink
-                  href="/login"
-                  className="text-sm font-medium text-gray-700 hover:text-purple-600"
-                >
-                  Login
-                </LocalizedClientLink>
-              )}
-
-              <Suspense
-                fallback={
+            {/* Right Actions - Different for logged in vs logged out */}
+            <div className="flex items-center space-x-2">
+              {isLoading ? (
+                // Loading state - show skeleton
+                <>
+                  <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+                </>
+              ) : !isLoggedIn ? (
+                // Before Login State
+                <>
                   <LocalizedClientLink
-                    className="hover:text-ui-fg-base flex gap-2"
-                    href="/cart"
-                    data-testid="nav-cart-link"
+                    href="/account"
+                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors duration-200 shadow-sm"
                   >
-                    <ShoppingCart className="h-5 w-5" />
-                    <span className="text-sm">(0)</span>
+                    Login
                   </LocalizedClientLink>
-                }
-              >
-                <CartButton />
-              </Suspense>
+                  
+                  <Suspense
+                    fallback={
+                      <div className="relative flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-700 rounded-lg transition-all duration-200">
+                        <ShoppingCart className="h-5 w-5" />
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-gray-200 rounded-full animate-pulse"></div>
+                      </div>
+                    }
+                  >
+                    <CartButton />
+                  </Suspense>
+                </>
+              ) : (
+                // After Login State
+                <>
+                  <Suspense
+                    fallback={
+                      <div className="relative flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-700 rounded-lg transition-all duration-200">
+                        <ShoppingCart className="h-5 w-5" />
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-gray-200 rounded-full animate-pulse"></div>
+                      </div>
+                    }
+                  >
+                    <CartButton />
+                  </Suspense>
 
-              {/* User Dropdown (always visible for demo; in real app base on isLoggedIn) */}
-              <div className="relative group">
-                <button className="flex items-center space-x-1 text-sm font-medium text-gray-700 hover:text-purple-600">
-                  <User className="h-5 w-5" />
-                  <span>Dhruvit</span>
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <LocalizedClientLink href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    My Account
-                  </LocalizedClientLink>
-                  <LocalizedClientLink href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    My Orders
-                  </LocalizedClientLink>
-                  <LocalizedClientLink href="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Wishlist
-                  </LocalizedClientLink>
-                  <hr className="my-1" />
-                  <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Logout
-                  </button>
-                </div>
-              </div>
+                  {/* Notifications */}
+                  <Notifications />
+
+                  {/* User Dropdown */}
+                  <UserDropdown customer={customer} />
+                </>
+              )}
             </div>
           </div>
         </div>

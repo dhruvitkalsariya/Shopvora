@@ -1,47 +1,33 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { ShoppingCart } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { useCart } from "@lib/hooks/use-cart"
 
 export default function CartButton() {
-  const [cartCount, setCartCount] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const { cart, isLoading } = useCart()
 
-  useEffect(() => {
-    // Simulate cart data loading
-    const timer = setTimeout(() => {
-      setCartCount(1) // Mock cart count
-      setLoading(false)
-    }, 100)
-
-    return () => clearTimeout(timer)
-  }, [])
+  const itemCount = cart?.items?.length || 0
+  const loading = isLoading
 
   if (loading) {
     return (
-      <LocalizedClientLink
-        className="hover:text-ui-fg-base flex gap-2"
-        href="/cart"
-        data-testid="nav-cart-link"
-      >
+      <div className="relative flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-700 rounded-lg transition-all duration-200">
         <ShoppingCart className="h-5 w-5" />
-        <span className="text-sm">(0)</span>
-      </LocalizedClientLink>
+        <div className="absolute -top-1 -right-1 w-5 h-5 bg-gray-200 rounded-full animate-pulse"></div>
+      </div>
     )
   }
 
   return (
     <LocalizedClientLink
-      className="hover:text-ui-fg-base flex gap-2 relative"
       href="/cart"
-      data-testid="nav-cart-link"
+      className="relative flex items-center justify-center w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-purple-600 rounded-lg transition-all duration-200"
     >
       <ShoppingCart className="h-5 w-5" />
-      <span className="text-sm">({cartCount})</span>
-      {cartCount > 0 && (
-        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-          {cartCount}
+      {itemCount > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+          {itemCount > 9 ? '9+' : itemCount}
         </span>
       )}
     </LocalizedClientLink>

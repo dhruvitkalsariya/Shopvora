@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, X } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { Search, X, ArrowRight } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 interface SearchResult {
   id: string
@@ -24,21 +24,67 @@ export default function SearchComponent() {
   const [showDropdown, setShowDropdown] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [isFocused, setIsFocused] = useState(false)
+  const [isProgrammaticUpdate, setIsProgrammaticUpdate] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Popular searches and categories
+  const popularSearches = [
+    "mobiles",
+    "tops", 
+    "shoes",
+    "furniture",
+    "smart wearables",
+    "electronics",
+    "fashion",
+    "home & garden",
+    "beauty",
+    "toys",
+    "sports",
+    "books"
+  ]
 
   // Debounced search effect
   useEffect(() => {
+    // Skip search if this is a programmatic update
+    if (isProgrammaticUpdate) {
+      setIsProgrammaticUpdate(false)
+      return
+    }
+
     const timeoutId = setTimeout(() => {
       if (query.trim()) {
         performSearch(query)
       } else {
         setResults({ products: [], suggestions: [], count: 0 })
-        setShowDropdown(false)
+        // Don't hide dropdown if focused and no query - show popular searches
+        if (isFocused) {
+          setShowDropdown(true)
+        } else {
+          setShowDropdown(false)
+        }
       }
     }, 300)
 
     return () => clearTimeout(timeoutId)
+  }, [query, isFocused, isProgrammaticUpdate])
+
+  // Read URL search parameters and populate input
+  useEffect(() => {
+    const urlQuery = searchParams.get('q')
+    if (urlQuery && urlQuery !== query) {
+      setIsProgrammaticUpdate(true)
+      setQuery(urlQuery)
+    }
+  }, [searchParams]) // Removed query dependency to prevent infinite loop
+
+  // Ensure input value is synchronized with query state
+  useEffect(() => {
+    if (inputRef.current && inputRef.current.value !== query) {
+      inputRef.current.value = query
+    }
   }, [query])
 
   // Close dropdown when clicking outside
@@ -64,41 +110,81 @@ export default function SearchComponent() {
       setSelectedIndex(-1)
     } catch (error) {
       console.error("Search error:", error)
-      setResults({ products: [], suggestions: [], count: 0 })
+      // Fallback to showing popular searches if API fails
+      setResults({ 
+        products: [], 
+        suggestions: popularSearches.filter(item => 
+          item.toLowerCase().includes(searchQuery.toLowerCase())
+        ), 
+        count: 0 
+      })
+      setShowDropdown(true)
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    const totalItems = results.products.length + results.suggestions.length
+    // Calculate total items based on what's actually being displayed
+    let totalItems = 0
+    let currentSuggestions: string[] = []
+    
+    if (query.trim()) {
+      // When user has typed something, show products + suggestions
+      totalItems = results.products.length + results.suggestions.length
+      currentSuggestions = results.suggestions
+    } else {
+      // When no query, show popular searches
+      totalItems = popularSearches.length
+      currentSuggestions = popularSearches
+    }
 
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault()
-        setSelectedIndex(prev => (prev < totalItems - 1 ? prev + 1 : prev))
+        setSelectedIndex(prev => {
+          if (prev < totalItems - 1) {
+            return prev + 1
+          } else if (prev === -1) {
+            // If nothing is selected, start from the first item
+            return 0
+          }
+          return prev
+        })
         break
       case "ArrowUp":
         e.preventDefault()
-        setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1))
+        setSelectedIndex(prev => {
+          if (prev > 0) {
+            return prev - 1
+          } else if (prev === 0) {
+            // If at first item, go back to no selection
+            return -1
+          }
+          return prev
+        })
         break
       case "Enter":
         e.preventDefault()
         if (selectedIndex >= 0) {
-          if (selectedIndex < results.products.length) {
+          if (query.trim() && selectedIndex < results.products.length) {
             // Navigate to product
             router.push(`/products/${results.products[selectedIndex].handle}`)
           } else {
-            // Use suggestion
-            const suggestionIndex = selectedIndex - results.products.length
-            setQuery(results.suggestions[suggestionIndex])
-            router.push(`/search?q=${encodeURIComponent(results.suggestions[suggestionIndex])}`)
+            // Use suggestion (either from search results or popular searches)
+            const suggestionIndex = query.trim() ? selectedIndex - results.products.length : selectedIndex
+            const selectedSuggestion = currentSuggestions[suggestionIndex]
+            if (selectedSuggestion) {
+              setQuery(selectedSuggestion)
+              router.push(`/search?q=${encodeURIComponent(selectedSuggestion)}`)
+            }
           }
         } else if (query.trim()) {
           // Search with current query
           router.push(`/search?q=${encodeURIComponent(query)}`)
         }
         setShowDropdown(false)
+        setSelectedIndex(-1)
         break
       case "Escape":
         setShowDropdown(false)
@@ -107,68 +193,99 @@ export default function SearchComponent() {
     }
   }
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion)
-    router.push(`/search?q=${encodeURIComponent(suggestion)}`)
-    setShowDropdown(false)
-  }
-
-  const handleProductClick = (product: SearchResult) => {
-    router.push(`/products/${product.handle}`)
-    setShowDropdown(false)
-  }
-
-  const clearSearch = () => {
-    setQuery("")
-    setResults({ products: [], suggestions: [], count: 0 })
-    setShowDropdown(false)
-    setSelectedIndex(-1)
-  }
-
-  const showPopularSearches = () => {
-    const popularSearches = {
-      products: [],
-      suggestions: [
-        "mobiles",
-        "tops",
-        "shoes", 
-        "furniture",
-        "smart wearables",
-        "electronics",
-        "fashion",
-        "home & garden"
-      ],
-      count: 0
-    }
-    setResults(popularSearches)
-    setShowDropdown(true)
-  }
-
   const handleFocus = () => {
     setIsFocused(true)
-    // Show popular searches when focused, even without typing
+    // Always show dropdown when focused, even without query
+    setShowDropdown(true)
+    
+    // If no query, show popular searches
     if (!query.trim()) {
-      showPopularSearches()
-    } else {
-      setShowDropdown(true)
+      setResults({ 
+        products: [], 
+        suggestions: popularSearches, 
+        count: 0 
+      })
+      setSelectedIndex(-1) // Reset selection when focusing
     }
   }
 
   const handleBlur = () => {
     setIsFocused(false)
+    // Delay hiding dropdown to allow for clicks
+    setTimeout(() => {
+      // Only hide dropdown if not clicking on a suggestion
+      if (!searchRef.current?.contains(document.activeElement)) {
+        setShowDropdown(false)
+      }
+    }, 200)
   }
+
+  const clearSearch = () => {
+    setQuery("")
+    setResults({ products: [], suggestions: popularSearches, count: 0 })
+    setShowDropdown(true)
+    setSelectedIndex(-1)
+  }
+
+  const handleProductClick = (product: SearchResult) => {
+    setShowDropdown(false)
+    setQuery("")
+    router.push(`/products/${product.handle}`)
+  }
+
+  const handleSuggestionClick = (suggestion: string) => {
+    // Close dropdown first to prevent interference
+    setShowDropdown(false)
+    setSelectedIndex(-1)
+    
+    // Set the query without triggering the debounced search
+    setIsProgrammaticUpdate(true)
+    setQuery(suggestion)
+    
+    // Focus the input and ensure the state is updated
+    if (inputRef.current) {
+      // Ensure the input is focused first
+      inputRef.current.focus()
+      
+      // Directly set the input value to ensure it's updated
+      inputRef.current.value = suggestion
+      
+      // Use multiple requestAnimationFrame calls to ensure state updates are processed
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (inputRef.current) {
+            inputRef.current.select() // Select the text so user can easily modify it
+          }
+        })
+      })
+    }
+    
+    // Automatically perform search when suggestion is clicked
+    setTimeout(() => {
+      router.push(`/search?q=${encodeURIComponent(suggestion)}`)
+    }, 300) // Increased delay to ensure state updates are processed
+  }
+
+  // Show popular searches when no query and focused
+  const shouldShowPopularSearches = isFocused && !query.trim() && results.suggestions.length === 0
 
   return (
     <div className="flex-1 max-w-2xl mx-6" ref={searchRef}>
       <div className="relative">
         <input
+          ref={inputRef}
           type="search"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            // Only update if this is a user input, not a programmatic update
+            if (!isProgrammaticUpdate) {
+              setQuery(e.target.value)
+            }
+          }}
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          placeholder="Search for Products, Brands and More"
+          placeholder="Search for products, brands and more"
           className="w-full pl-10 pr-10 py-2 rounded-lg border placeholder-gray-500 text-sm transition-all duration-200"
           style={{
             backgroundColor: 'rgba(106, 52, 209, 0.05)',
@@ -198,16 +315,31 @@ export default function SearchComponent() {
           </button>
         )}
 
+        {/* Search Button */}
+        {query && (
+          <button
+            onClick={() => {
+              if (query.trim()) {
+                router.push(`/search?q=${encodeURIComponent(query.trim())}`)
+              }
+            }}
+            className="absolute right-10 top-1/2 -translate-y-1/2 h-8 w-8 bg-[#2A1454] text-white rounded-md flex items-center justify-center hover:bg-[#1a0f3a] transition-all duration-200 shadow-md hover:shadow-lg z-10"
+            title="Search"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+        )}
+
         {/* Loading Indicator */}
         {isLoading && (
-          <div className="absolute right-10 top-1/2 -translate-y-1/2">
+          <div className="absolute right-20 top-1/2 -translate-y-1/2">
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#2A1454] border-t-transparent"></div>
           </div>
         )}
 
         {/* Search Dropdown */}
-        {showDropdown && (results.products.length > 0 || results.suggestions.length > 0) && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
+        {showDropdown && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
             {/* Products */}
             {results.products.length > 0 && (
               <div className="p-2">
@@ -217,10 +349,18 @@ export default function SearchComponent() {
                 {results.products.map((product, index) => (
                   <div
                     key={product.id}
-                    className={`flex items-center space-x-3 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 ${
-                      selectedIndex === index ? 'bg-gray-50' : ''
+                    className={`flex items-center space-x-3 px-2 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-purple-100 hover:shadow-sm border border-transparent hover:border-purple-200 ${
+                      selectedIndex === index ? 'bg-purple-100 border-purple-200 shadow-sm' : ''
                     }`}
-                    onClick={() => handleProductClick(product)}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleProductClick(product)
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                    }}
+                    onMouseEnter={() => setSelectedIndex(index)}
                   >
                     {product.thumbnail && (
                       <img 
@@ -237,23 +377,61 @@ export default function SearchComponent() {
 
             {/* Suggestions */}
             {results.suggestions.length > 0 && (
-              <div className="border-t border-gray-100">
+              <div className={`${results.products.length > 0 ? 'border-t border-gray-100' : ''}`}>
                 <div className="p-2">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wide px-2 py-1">
-                    Suggestions
+                    {query.trim() ? "Suggestions" : "Popular Searches"}
                   </div>
                   {results.suggestions.map((suggestion, index) => (
                     <div
                       key={suggestion}
-                      className={`px-2 py-2 rounded cursor-pointer hover:bg-gray-50 text-sm text-gray-700 ${
-                        selectedIndex === results.products.length + index ? 'bg-gray-50' : ''
+                      className={`flex items-center justify-between px-2 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-purple-100 hover:shadow-sm border border-transparent hover:border-purple-200 text-sm text-gray-700 ${
+                        selectedIndex === results.products.length + index ? 'bg-purple-100 border-purple-200 shadow-sm' : ''
                       }`}
-                      onClick={() => handleSuggestionClick(suggestion)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleSuggestionClick(suggestion)
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                      }}
+                      onMouseEnter={() => setSelectedIndex(results.products.length + index)}
                     >
-                      {suggestion}
+                      <span>{suggestion}</span>
+                      <ArrowRight className="h-3 w-3 text-gray-400" />
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Popular Searches when no query and focused */}
+            {shouldShowPopularSearches && (
+              <div className="p-2">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide px-2 py-1">
+                  Popular Searches
+                </div>
+                {popularSearches.map((suggestion, index) => (
+                  <div
+                    key={suggestion}
+                    className={`flex items-center justify-between px-2 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-purple-100 hover:shadow-sm border border-transparent hover:border-purple-200 text-sm text-gray-700 ${
+                      selectedIndex === index ? 'bg-purple-100 border-purple-200 shadow-sm' : ''
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleSuggestionClick(suggestion)
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                    }}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                  >
+                    <span>{suggestion}</span>
+                    <ArrowRight className="h-3 w-3 text-gray-400" />
+                  </div>
+                ))}
               </div>
             )}
           </div>
