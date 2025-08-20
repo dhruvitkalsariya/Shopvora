@@ -2,6 +2,9 @@ import { Metadata } from "next"
 
 import HeroSection from "@modules/home/components/hero"
 import ExploreCategories from "@modules/home/components/explore-categories"
+import PopularProducts from "@modules/home/components/popular-products"
+import HeroBanner from "@modules/home/components/hero/hero-banner"
+import ExploreNewCollection from "@modules/home/components/explore-new-collection"
 import { getRegion } from "@lib/data/regions"
 
 export const metadata: Metadata = {
@@ -29,6 +32,9 @@ export default async function Home(props: {
       </section>
       {/* Original content */}
       <ExploreCategories />
+      <PopularProducts />
+      <HeroBanner/>     
+      <ExploreNewCollection />
     </>
   )
 }

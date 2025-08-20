@@ -3,54 +3,58 @@
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Image from "next/image"
 
 const categories = [
   {
     id: 1,
     name: "Skincare",
-    image: "/images/categories/skincare.jpg",
+    image: "/images/Top Categories/Skincare-Categories.png",
     href: "/categories/skincare",
-    color: "bg-gradient-to-br from-pink-100 to-purple-100",
-    icon: "🧴"
+    bgColor: "bg-gradient-to-br from-pink-50 to-rose-50",
+    borderColor: "border-pink-200"
   },
   {
     id: 2,
     name: "Electronic",
-    image: "/images/categories/electronics.jpg",
+    image: "/images/Top Categories/Electroinc-Categories.png",
     href: "/categories/electronics",
-    color: "bg-gradient-to-br from-blue-100 to-indigo-100",
-    icon: "📺"
+    bgColor: "bg-gradient-to-br from-blue-50 to-indigo-50",
+    borderColor: "border-blue-200"
   },
   {
     id: 3,
     name: "Footwear",
-    image: "/images/categories/footwear.jpg",
+    image: "/images/Top Categories/Footwear-Categories.png",
     href: "/categories/footwear",
-    color: "bg-gradient-to-br from-amber-100 to-orange-100",
-    icon: "👟"
+    bgColor: "bg-gradient-to-br from-amber-50 to-orange-50",
+    borderColor: "border-amber-200"
   },
   {
     id: 4,
     name: "Laptop & PC",
-    image: "/images/categories/laptop.jpg",
+    image: "/images/Top Categories/Laptop&pc-Categories.png",
     href: "/categories/laptop-pc",
-    color: "bg-gradient-to-br from-gray-100 to-slate-100",
+    bgColor: "bg-gradient-to-br from-gray-50 to-slate-50",
+    borderColor: "border-gray-200",
     icon: "💻"
   },
   {
     id: 5,
     name: "Smartphone",
-    image: "/images/categories/smartphone.jpg",
+    image: "/images/Top Categories/Smartphone-Categories.png",
     href: "/categories/smartphones",
-    color: "bg-gradient-to-br from-green-100 to-emerald-100",
+    bgColor: "bg-gradient-to-br from-green-50 to-emerald-50",
+    borderColor: "border-green-200",
     icon: "📱"
   },
   {
     id: 6,
     name: "Fashion",
-    image: "/images/categories/fashion.jpg",
+    image: "/images/Top Categories/Fashion-Categories.png",
     href: "/categories/fashion",
-    color: "bg-gradient-to-br from-red-100 to-pink-100",
+    bgColor: "bg-gradient-to-br from-purple-50 to-pink-50",
+    borderColor: "border-purple-200",
     icon: "👕"
   }
 ]
@@ -78,11 +82,11 @@ const ExploreCategories = () => {
   }
 
   return (
-    <section className="py-12 md:py-16 lg:py-20 bg-white">
+    <section className="py-6 md:py-8 lg:py-10 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 md:mb-12"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -104,7 +108,7 @@ const ExploreCategories = () => {
 
         {/* Categories Grid */}
         <motion.div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -115,27 +119,35 @@ const ExploreCategories = () => {
               key={category.id}
               variants={itemVariants}
               whileHover={{ 
-                y: -4,
-                scale: 1.02,
-                transition: { duration: 0.2 }
+                y: -6,
+                scale: 1.03,
+                transition: { duration: 0.3 }
               }}
             >
               <LocalizedClientLink
                 href={category.href}
                 className="block group"
               >
-                <div className={`relative rounded-2xl p-4 md:p-6 ${category.color} transition-all duration-300 group-hover:shadow-lg group-hover:shadow-purple-100`}>
-                  {/* Category Icon/Image */}
-                  <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-full bg-white/60 flex items-center justify-center shadow-sm">
-                    <span className="text-xl md:text-2xl">{category.icon}</span>
+                <div className={`relative rounded-xl p-4 md:p-5 lg:p-6 ${category.bgColor} border ${category.borderColor} transition-all duration-300 group-hover:shadow-lg group-hover:shadow-purple-100 group-hover:border-purple-300`}>
+                  {/* Category Image */}
+                  <div className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-auto mb-3 md:mb-4 rounded-full bg-white shadow-sm border-2 border-white flex items-center justify-center overflow-hidden">
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        className="object-cover rounded-full"
+                        sizes="(max-width: 640px) 64px, (max-width: 768px) 72px, (max-width: 1024px) 80px, 96px"
+                      />
+                    </div>
                   </div>
                   
-                  <h3 className="text-center text-sm md:text-base font-semibold text-gray-900 group-hover:text-purple-600 transition-colors duration-300 leading-tight">
+                  <h3 className="text-center text-xs sm:text-sm md:text-base font-semibold text-gray-900 group-hover:text-purple-600 transition-colors duration-300 leading-tight">
                     {category.name}
                   </h3>
                   
                   {/* Hover effect overlay */}
-                  <div className="absolute inset-0 bg-purple-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-purple-600/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
               </LocalizedClientLink>
             </motion.div>

@@ -1,73 +1,74 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Heart, Star, ShoppingCart } from "lucide-react"
-import { useState, useEffect } from "react"
+import { ArrowRight, Heart } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Image from "next/image"
+import { useState } from "react"
 
-interface Product {
-  id: string
-  title: string
-  handle: string
-  thumbnail?: string
-  price_range: {
-    min_price: {
-      amount: number
-      currency_code: string
-    }
-    max_price: {
-      amount: number
-      currency_code: string
-    }
+const popularProducts = [
+  {
+    id: 1,
+    name: "Laptop Intel Core i7",
+    category: "Laptop & PC",
+    description: "High-performance laptop with Intel Core i7 processor, perfect for work and gaming. Features 16GB RAM and 512GB SSD.",
+    currentPrice: "Rs.49,999",
+    originalPrice: "Rs.51,999",
+    rating: 4.5,
+    reviewCount: 300,
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop",
+    href: "/products/laptop-intel-core",
+    isNew: false,
+    discount: 4
+  },
+  {
+    id: 2,
+    name: "Samsung Galaxy Z Fold",
+    category: "Smartphone",
+    description: "Revolutionary foldable smartphone with 7.6-inch display. Experience the future of mobile technology.",
+    currentPrice: "Rs.89,999",
+    originalPrice: "Rs.95,999",
+    rating: 4.8,
+    reviewCount: 450,
+    image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop",
+    href: "/products/samsung-galaxy-z-series",
+    isNew: true,
+    discount: 6
+  },
+  {
+    id: 3,
+    name: "ASUS ROG Gaming Laptop",
+    category: "Laptop & PC",
+    description: "Gaming laptop with AMD Ryzen processor and RTX graphics. Built for ultimate gaming performance.",
+    currentPrice: "Rs.65,999",
+    originalPrice: "Rs.69,999",
+    rating: 4.3,
+    reviewCount: 280,
+    image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&h=400&fit=crop",
+    href: "/products/laptop-asus-amd-ryzen",
+    isNew: false,
+    discount: 6
+  },
+  {
+    id: 4,
+    name: "Organic Face Cream",
+    category: "Beauty & Skincare",
+    description: "Natural organic face cream with vitamin E and aloe vera. Nourishes and hydrates your skin.",
+    currentPrice: "Rs.1,299",
+    originalPrice: "Rs.1,599",
+    rating: 4.2,
+    reviewCount: 120,
+    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop",
+    href: "/products/boots-cream",
+    isNew: false,
+    discount: 19
   }
-  variants: Array<{
-    id: string
-    title: string
-    prices: Array<{
-      amount: number
-      currency_code: string
-    }>
-  }>
-}
+]
 
-interface PopularProductsProps {
-  region: any
-}
+const PopularProducts = () => {
+  const [wishlist, setWishlist] = useState<number[]>([])
 
-// Fallback price formatting function
-const formatPrice = (amount: number, currencyCode: string = "INR") => {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: currencyCode.toUpperCase(),
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount / 100) // Assuming amount is in cents
-}
-
-const PopularProducts = ({ region }: PopularProductsProps) => {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [wishlist, setWishlist] = useState<string[]>([])
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch('/api/products?limit=8&sort=popularity')
-        const data = await response.json()
-        setProducts(data.products || [])
-      } catch (error) {
-        console.error('Error fetching products:', error)
-        // Fallback to mock data if API fails
-        setProducts(mockProducts)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProducts()
-  }, [])
-
-  const toggleWishlist = (productId: string) => {
+  const toggleWishlist = (productId: number) => {
     setWishlist(prev => 
       prev.includes(productId) 
         ? prev.filter(id => id !== productId)
@@ -96,208 +97,168 @@ const PopularProducts = ({ region }: PopularProductsProps) => {
     }
   }
 
-  // Mock products for fallback
-  const mockProducts: Product[] = [
-    {
-      id: "1",
-      title: "Premium Wireless Headphones",
-      handle: "premium-wireless-headphones",
-      thumbnail: "/images/products/headphones.jpg",
-      price_range: {
-        min_price: { amount: 299900, currency_code: "inr" },
-        max_price: { amount: 299900, currency_code: "inr" }
-      },
-      variants: [{
-        id: "1",
-        title: "Default",
-        prices: [{ amount: 299900, currency_code: "inr" }]
-      }]
-    },
-    {
-      id: "2",
-      title: "Smart Fitness Watch",
-      handle: "smart-fitness-watch",
-      thumbnail: "/images/products/watch.jpg",
-      price_range: {
-        min_price: { amount: 499900, currency_code: "inr" },
-        max_price: { amount: 499900, currency_code: "inr" }
-      },
-      variants: [{
-        id: "2",
-        title: "Default",
-        prices: [{ amount: 499900, currency_code: "inr" }]
-      }]
-    },
-    {
-      id: "3",
-      title: "Organic Cotton T-Shirt",
-      handle: "organic-cotton-tshirt",
-      thumbnail: "/images/products/tshirt.jpg",
-      price_range: {
-        min_price: { amount: 89900, currency_code: "inr" },
-        max_price: { amount: 89900, currency_code: "inr" }
-      },
-      variants: [{
-        id: "3",
-        title: "Default",
-        prices: [{ amount: 89900, currency_code: "inr" }]
-      }]
-    },
-    {
-      id: "4",
-      title: "Premium Coffee Maker",
-      handle: "premium-coffee-maker",
-      thumbnail: "/images/products/coffee-maker.jpg",
-      price_range: {
-        min_price: { amount: 399900, currency_code: "inr" },
-        max_price: { amount: 399900, currency_code: "inr" }
-      },
-      variants: [{
-        id: "4",
-        title: "Default",
-        prices: [{ amount: 399900, currency_code: "inr" }]
-      }]
-    }
-  ]
-
-  const displayProducts = loading ? mockProducts : products
-
   return (
-    <section className="py-16 bg-white">
+    <section className="py-6 md:py-8 lg:py-10 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
-          className="flex items-center justify-between mb-12"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <div className="mb-4 sm:mb-0">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
               Popular Products
             </h2>
-            <p className="text-lg text-gray-600">
-              Trending products loved by our customers
-            </p>
           </div>
           <LocalizedClientLink
             href="/products"
-            className="text-purple-600 hover:text-purple-700 font-semibold flex items-center space-x-1"
+            className="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium transition-colors duration-300 group"
           >
             <span>See All</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-300" />
           </LocalizedClientLink>
         </motion.div>
 
         {/* Products Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="bg-gray-200 rounded-lg h-64 mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {displayProducts.map((product) => (
-              <motion.div
-                key={product.id}
-                variants={itemVariants}
-                whileHover={{ 
-                  y: -8,
-                  transition: { duration: 0.2 }
-                }}
-                className="group"
-              >
-                <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
-                  {/* Product Image */}
-                  <div className="relative aspect-square bg-gray-100">
-                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                      <div className="w-16 h-16 bg-gray-400 rounded-full"></div>
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          {popularProducts.map((product) => (
+            <motion.div
+              key={product.id}
+              variants={itemVariants}
+              whileHover={{ 
+                y: -8,
+                scale: 1.02,
+                transition: { duration: 0.3 }
+              }}
+              className="group"
+            >
+              <LocalizedClientLink href={product.href}>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:border-purple-300">
+                  {/* Product Image Container */}
+                  <div className="relative aspect-square overflow-hidden bg-gray-100">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      width={400}
+                      height={400}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        // Fallback to placeholder if image fails to load
+                        const target = e.target as HTMLImageElement
+                        target.style.display = 'none'
+                        target.nextElementSibling?.classList.remove('hidden')
+                      }}
+                    />
+                    {/* Fallback placeholder */}
+                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center hidden">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-gray-400 rounded-full mx-auto mb-2 flex items-center justify-center">
+                          <span className="text-white text-xl">📦</span>
+                        </div>
+                        <span className="text-gray-500 text-xs">Product Image</span>
+                      </div>
                     </div>
                     
-                    {/* Wishlist Button */}
-                    <button
-                      onClick={() => toggleWishlist(product.id)}
-                      className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-300 ${
-                        wishlist.includes(product.id)
-                          ? 'bg-red-500 text-white'
-                          : 'bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white'
+                    {/* Heart Icon */}
+                    <button 
+                      className={`absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors duration-200 z-10 ${
+                        wishlist.includes(product.id) 
+                          ? 'bg-red-500 text-white' 
+                          : 'hover:bg-white'
                       }`}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        toggleWishlist(product.id)
+                      }}
                     >
-                      <Heart className={`h-4 w-4 ${wishlist.includes(product.id) ? 'fill-current' : ''}`} />
+                      <Heart className={`w-4 h-4 transition-colors duration-200 ${
+                        wishlist.includes(product.id) 
+                          ? 'text-white fill-current' 
+                          : 'text-gray-600 hover:text-red-500'
+                      }`} />
                     </button>
-
-                    {/* Quick Add to Cart */}
-                    <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-purple-700 transition-colors duration-300 flex items-center justify-center space-x-2">
-                        <ShoppingCart className="h-4 w-4" />
-                        <span>Add to Cart</span>
-                      </button>
-                    </div>
+                    
+                    {/* New Badge */}
+                    {product.isNew && (
+                      <div className="absolute top-3 left-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        New
+                      </div>
+                    )}
+                    
+                    {/* Discount Badge */}
+                    {product.discount > 0 && (
+                      <div className="absolute bottom-3 left-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        -{product.discount}%
+                      </div>
+                    )}
                   </div>
-
+                  
                   {/* Product Info */}
                   <div className="p-4">
-                    <LocalizedClientLink href={`/products/${product.handle}`}>
-                      <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors duration-300 line-clamp-2">
-                        {product.title}
-                      </h3>
-                    </LocalizedClientLink>
-
                     {/* Rating */}
                     <div className="flex items-center mb-2">
                       <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-500 ml-2">(128)</span>
-                    </div>
-
-                    {/* Price */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold text-gray-900">
-                          {formatPrice(product.price_range.min_price.amount, product.price_range.min_price.currency_code)}
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <span 
+                              key={i} 
+                              className={`text-sm ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                            >
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 ml-1">
+                          {product.rating}
                         </span>
-                        {product.price_range.max_price.amount > product.price_range.min_price.amount && (
-                          <span className="text-sm text-gray-500 line-through">
-                            {formatPrice(product.price_range.max_price.amount, product.price_range.max_price.currency_code)}
-                          </span>
-                        )}
+                        <span className="text-sm text-gray-500 ml-1">
+                          ({product.reviewCount})
+                        </span>
                       </div>
-                      
-                      {/* Discount Badge */}
-                      {product.price_range.max_price.amount > product.price_range.min_price.amount && (
-                        <span className="bg-red-100 text-red-600 text-xs font-semibold px-2 py-1 rounded-full">
-                          {Math.round(((product.price_range.max_price.amount - product.price_range.min_price.amount) / product.price_range.max_price.amount) * 100)}% OFF
+                    </div>
+                    
+                    {/* Category */}
+                    <p className="text-xs text-gray-500 mb-2 font-medium">
+                      {product.category}
+                    </p>
+                    
+                    {/* Product Name */}
+                    <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors duration-300">
+                      {product.name}
+                    </h3>
+                    
+                    {/* Description */}
+                    <p className="text-xs text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                      {product.description}
+                    </p>
+                    
+                    {/* Price */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-gray-900">
+                        {product.currentPrice}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-sm text-gray-500 line-through">
+                          {product.originalPrice}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+              </LocalizedClientLink>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </section>
   )
