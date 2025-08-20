@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 
-import PromotionalCarouselWrapper from "@modules/home/components/promotional-carousel/page-wrapper"
+import HeroSection from "@modules/home/components/hero"
 import ExploreCategories from "@modules/home/components/explore-categories"
 import { getRegion } from "@lib/data/regions"
 
@@ -23,7 +23,11 @@ export default async function Home(props: {
 
   return (
     <>
-      <PromotionalCarouselWrapper />
+      {/* 1. Hero Carousel - Main hero section */}
+      <section className="mb-8">
+        <HeroSection />
+      </section>
+      {/* Original content */}
       <ExploreCategories />
     </>
   )

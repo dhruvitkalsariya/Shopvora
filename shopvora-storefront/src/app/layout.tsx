@@ -8,9 +8,27 @@ export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
 }
 
+// Error boundary component to catch hydration errors
+function ErrorBoundary({ children }: { children: React.ReactNode }) {
+  return (
+    <div suppressHydrationWarning>
+      {children}
+    </div>
+  )
+}
+
+// Client-side only wrapper to prevent hydration issues
+function ClientOnlyLanguageProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <LanguageProvider>
+      {children}
+    </LanguageProvider>
+  )
+}
+
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-mode="light">
+    <html lang="en" data-mode="light" suppressHydrationWarning>
       <head>
         <meta name="google" content="notranslate" />
         <meta httpEquiv="content-language" content="en" />
@@ -159,26 +177,26 @@ export default function RootLayout(props: { children: React.ReactNode }) {
                 enableTranslation: function(langCode, showNotification = false) {
                   console.log('Enabling translation for:', langCode);
                   
-                // Set document language
-                document.documentElement.lang = langCode;
+                  // Set document language
+                  document.documentElement.lang = langCode;
                   document.documentElement.setAttribute('lang', langCode);
                 
                   // Remove notranslate meta tag completely
-                const metaTag = document.querySelector('meta[name="google"]');
-                if (metaTag) {
-                    metaTag.remove();
-                }
+                  const metaTag = document.querySelector('meta[name="google"]');
+                  if (metaTag) {
+                      metaTag.remove();
+                  }
                 
-                // Update content-language meta
-                let langMeta = document.querySelector('meta[http-equiv="content-language"]');
-                if (langMeta) {
-                  langMeta.setAttribute('content', langCode);
-                } else {
-                  langMeta = document.createElement('meta');
-                  langMeta.setAttribute('http-equiv', 'content-language');
-                  langMeta.setAttribute('content', langCode);
-                  document.head.appendChild(langMeta);
-                }
+                  // Update content-language meta
+                  let langMeta = document.querySelector('meta[http-equiv="content-language"]');
+                  if (langMeta) {
+                    langMeta.setAttribute('content', langCode);
+                  } else {
+                    langMeta = document.createElement('meta');
+                    langMeta.setAttribute('http-equiv', 'content-language');
+                    langMeta.setAttribute('content', langCode);
+                    document.head.appendChild(langMeta);
+                  }
                 
                   // Add additional meta tags for better browser detection
                   const additionalMeta = document.createElement('meta');
@@ -192,16 +210,16 @@ export default function RootLayout(props: { children: React.ReactNode }) {
                   // Trigger browser translation for non-English languages
                   if (langCode !== 'en') {
                     // Method 1: Trigger language change event
-                window.dispatchEvent(new Event('languagechange'));
+                    window.dispatchEvent(new Event('languagechange'));
                 
                     // Method 2: Change page title to trigger translation
-                  setTimeout(() => {
-                    const originalTitle = document.title;
-                    document.title = 'Translation Trigger - ' + originalTitle;
                     setTimeout(() => {
-                      document.title = originalTitle;
-                    }, 100);
-                  }, 200);
+                      const originalTitle = document.title;
+                      document.title = 'Translation Trigger - ' + originalTitle;
+                      setTimeout(() => {
+                        document.title = originalTitle;
+                      }, 100);
+                    }, 200);
                     
                     // Method 3: Add temporary element with target language
                     setTimeout(() => {
@@ -288,6 +306,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
                     </div>
                   \`;
                   
+                  // Add animation styles
                   const style = document.createElement('style');
                   style.textContent = \`
                     @keyframes slideIn {
@@ -296,116 +315,26 @@ export default function RootLayout(props: { children: React.ReactNode }) {
                     }
                   \`;
                   document.head.appendChild(style);
+                  
                   document.body.appendChild(notification);
                   
+                  // Remove notification after 5 seconds
                   setTimeout(() => {
                     notification.remove();
                     style.remove();
                   }, 5000);
-                },
-                
-                // Initialize translation system
-                init: function() {
-                  // Check if user has a saved language preference
-                  const savedLanguage = localStorage.getItem('shopvora-language');
-                  
-                  if (savedLanguage && savedLanguage !== 'en') {
-                    // Use saved preference
-                    setTimeout(() => {
-                      this.enableTranslation(savedLanguage, false);
-                    }, 1000);
-                  } else {
-                    // Auto-detect browser language
-                    const browserLang = this.detectBrowserLanguage();
-                    if (browserLang !== 'en') {
-                      // Ask user if they want to translate
-                      setTimeout(() => {
-                        this.showLanguageDetectionPrompt(browserLang);
-                      }, 2000);
-                    }
-                  }
-                },
-                
-                // Show language detection prompt
-                showLanguageDetectionPrompt: function(detectedLang) {
-                  const languageNames = {
-                    hi: "Hindi", 
-                    gu: "Gujarati",
-                    mr: "Marathi",
-                    ta: "Tamil",
-                    te: "Telugu"
-                  };
-                  
-                  const notification = document.createElement('div');
-                  notification.style.cssText = \`
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #3b82f6;
-                    color: white;
-                    padding: 16px 20px;
-                    border-radius: 8px;
-                    z-index: 9999;
-                    font-family: system-ui, sans-serif;
-                    font-size: 14px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                    animation: slideIn 0.3s ease-out;
-                    max-width: 350px;
-                    line-height: 1.4;
-                  \`;
-                  
-                  notification.innerHTML = \`
-                    <div style="font-weight: 600; margin-bottom: 8px;">Detected Language</div>
-                    <div style="margin-bottom: 12px;">We detected your browser language as \${languageNames[detectedLang]}. Would you like to translate the website?</div>
-                    <div style="display: flex; gap: 8px;">
-                      <button id="translate-yes" style="padding: 6px 12px; background: white; color: #3b82f6; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Yes, Translate</button>
-                      <button id="translate-no" style="padding: 6px 12px; background: transparent; color: white; border: 1px solid white; border-radius: 4px; font-size: 12px; cursor: pointer;">No, Keep English</button>
-                    </div>
-                  \`;
-                  
-                  const style = document.createElement('style');
-                  style.textContent = \`
-                    @keyframes slideIn {
-                      from { transform: translateX(100%); opacity: 0; }
-                      to { transform: translateX(0); opacity: 1; }
-                    }
-                  \`;
-                  document.head.appendChild(style);
-                  document.body.appendChild(notification);
-                  
-                  // Add event listeners
-                  document.getElementById('translate-yes').addEventListener('click', () => {
-                    this.enableTranslation(detectedLang, true);
-                    notification.remove();
-                    style.remove();
-                  });
-                  
-                  document.getElementById('translate-no').addEventListener('click', () => {
-                    notification.remove();
-                    style.remove();
-                  });
-                  
-                  // Auto-remove after 10 seconds
-                  setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                      notification.remove();
-                      style.remove();
-                    }
-                  }, 10000);
                 }
               };
               
               // Initialize translation system when page loads
               document.addEventListener('DOMContentLoaded', function() {
-                window.shopvoraTranslation.init();
-                
                 // Check for saved Google Translate language
                 const savedGoogleLang = localStorage.getItem('google-translate-lang');
                 if (savedGoogleLang && savedGoogleLang !== 'en') {
                   setTimeout(() => {
-                    if (typeof window !== 'undefined' && (window as any).google && (window as any).google.translate) {
+                    if (typeof window !== 'undefined' && window.google && window.google.translate) {
                       try {
-                        const translateElement = (window as any).google.translate.TranslateElement.getInstance();
+                        const translateElement = window.google.translate.TranslateElement.getInstance();
                         if (translateElement) {
                           translateElement.translatePage(savedGoogleLang);
                         }
@@ -470,16 +399,14 @@ export default function RootLayout(props: { children: React.ReactNode }) {
                 notification.innerHTML = \`
                   <div style="font-weight: 600; margin-bottom: 8px;">Language Changed to \${languageNames[langCode]}</div>
                   <div style="margin-bottom: 8px;">If translation doesn't appear automatically:</div>
-                  <div style="font-size: 12px; margin-bottom: 12px;">
+                  <div style="font-size: 12px;">
                     1. Right-click on the page<br>
                     2. Select "Translate to \${languageNames[langCode]}"<br>
                     3. Or use your browser's translate button
                   </div>
-                  <div style="font-size: 11px; opacity: 0.9;">
-                    💡 Tip: Most browsers have a translate icon in the address bar
-                  </div>
                 \`;
                 
+                // Add animation styles
                 const style = document.createElement('style');
                 style.textContent = \`
                   @keyframes slideIn {
@@ -488,242 +415,15 @@ export default function RootLayout(props: { children: React.ReactNode }) {
                   }
                 \`;
                 document.head.appendChild(style);
+                
                 document.body.appendChild(notification);
                 
+                // Remove notification after 5 seconds
                 setTimeout(() => {
                   notification.remove();
                   style.remove();
                 }, 5000);
               };
-              
-              // Global function to show Google Translate popup
-              window.showGoogleTranslatePopup = function(langCode) {
-                const languageNames = {
-                  'hi': 'Hindi',
-                  'gu': 'Gujarati', 
-                  'mr': 'Marathi',
-                  'ta': 'Tamil',
-                  'te': 'Telugu'
-                };
-                
-                const notification = document.createElement('div');
-                notification.style.cssText = \`
-                  position: fixed;
-                  top: 20px;
-                  right: 20px;
-                  background: #3b82f6;
-                  color: white;
-                  padding: 16px 20px;
-                  border-radius: 8px;
-                  z-index: 10000;
-                  font-family: system-ui, sans-serif;
-                  font-size: 14px;
-                  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                  animation: slideIn 0.3s ease-out;
-                  max-width: 350px;
-                  line-height: 1.4;
-                \`;
-                
-                notification.innerHTML = \`
-                  <div style="font-weight: 600; margin-bottom: 8px;">Google Translate Activated</div>
-                  <div style="margin-bottom: 8px;">Page is now being translated to \${languageNames[langCode] || langCode}.</div>
-                  <div style="font-size: 12px; opacity: 0.9;">
-                    Translation will be applied to all content on this page.
-                  </div>
-                \`;
-                
-                const style = document.createElement('style');
-                style.textContent = \`
-                  @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                  }
-                \`;
-                document.head.appendChild(style);
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                  notification.remove();
-                  style.remove();
-                }, 4000);
-              };
-            `,
-          }}
-        />
-        {/* Google Translate Widget */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              function googleTranslateElementInit() {
-                new google.translate.TranslateElement({
-                  pageLanguage: 'en',
-                  includedLanguages: 'hi,gu,mr,ta,te',
-                  layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
-                  autoDisplay: false,
-                  multilanguagePage: true,
-                  gaTrack: false,
-                }, 'google_translate_element');
-                
-                // Add custom styles for the Google Translate widget
-                const style = document.createElement('style');
-                style.textContent = \`
-                  .goog-te-gadget {
-                    font-family: system-ui, sans-serif !important;
-                    font-size: 12px !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                  }
-                  .goog-te-gadget .goog-te-combo {
-                    padding: 6px 8px !important;
-                    border: 1px solid #d1d5db !important;
-                    border-radius: 6px !important;
-                    background: white !important;
-                    font-size: 12px !important;
-                    color: #374151 !important;
-                    outline: none !important;
-                    min-width: 120px !important;
-                  }
-                  .goog-te-gadget .goog-te-combo:focus {
-                    border-color: #8b5cf6 !important;
-                    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1) !important;
-                  }
-                  .goog-te-banner-frame {
-                    display: none !important;
-                  }
-                  .goog-te-menu-value {
-                    color: #374151 !important;
-                  }
-                  .goog-te-gadget img {
-                    display: none !important;
-                  }
-                  .goog-te-banner-frame.skiptranslate {
-                    display: none !important;
-                  }
-                  body {
-                    top: 0px !important;
-                  }
-                  .goog-te-banner-frame {
-                    display: none !important;
-                  }
-                  .goog-te-menu-frame {
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-                    border-radius: 8px !important;
-                  }
-                  /* Hide Google Translate banner completely */
-                  .skiptranslate {
-                    display: none !important;
-                  }
-                  .goog-te-banner-frame.skiptranslate {
-                    display: none !important;
-                  }
-                  .goog-te-banner-frame {
-                    display: none !important;
-                  }
-                  /* Remove top margin that Google Translate adds */
-                  body {
-                    top: 0px !important;
-                    position: static !important;
-                  }
-                  /* Hide any Google Translate UI elements */
-                  .goog-te-spinner-pos {
-                    display: none !important;
-                  }
-                  .goog-te-banner-frame {
-                    display: none !important;
-                  }
-                  .goog-te-menu-frame {
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-                    border-radius: 8px !important;
-                  }
-                \`;
-                document.head.appendChild(style);
-                
-                // Listen for translation changes
-                const originalTranslateElement = google.translate.TranslateElement;
-                google.translate.TranslateElement = function(settings, element) {
-                  const instance = new originalTranslateElement(settings, element);
-                  
-                  // Override the translatePage method to track changes
-                  const originalTranslatePage = instance.translatePage;
-                  instance.translatePage = function(targetLang) {
-                    console.log('Google Translate: Translating to', targetLang);
-                    
-                    // Store the target language
-                    localStorage.setItem('google-translate-lang', targetLang);
-                    
-                    // Call the original method
-                    originalTranslatePage.call(this, targetLang);
-                    
-                    // Hide the banner after translation
-                    setTimeout(() => {
-                      const banner = document.querySelector('.goog-te-banner-frame');
-                      if (banner) {
-                        banner.style.display = 'none';
-                      }
-                      // Remove top margin
-                      document.body.style.top = '0px';
-                      document.body.style.position = 'static';
-                    }, 100);
-                    
-                    // Show success notification
-                    showGoogleTranslateNotification(targetLang);
-                  };
-                  
-                  return instance;
-                };
-              }
-              
-              // Show Google Translate notification
-              function showGoogleTranslateNotification(langCode) {
-                const languageNames = {
-                  'hi': 'Hindi',
-                  'gu': 'Gujarati', 
-                  'mr': 'Marathi',
-                  'ta': 'Tamil',
-                  'te': 'Telugu'
-                };
-                
-                const notification = document.createElement('div');
-                notification.style.cssText = \`
-                  position: fixed;
-                  top: 20px;
-                  right: 20px;
-                  background: #10b981;
-                  color: white;
-                  padding: 16px 20px;
-                  border-radius: 8px;
-                  z-index: 10000;
-                  font-family: system-ui, sans-serif;
-                  font-size: 14px;
-                  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                  animation: slideIn 0.3s ease-out;
-                  max-width: 350px;
-                  line-height: 1.4;
-                \`;
-                
-                notification.innerHTML = \`
-                  <div style="font-weight: 600; margin-bottom: 8px;">Google Translate Activated</div>
-                  <div style="margin-bottom: 8px;">Page is now being translated to \${languageNames[langCode] || langCode}.</div>
-                  <div style="font-size: 12px; opacity: 0.9;">
-                    Translation will be applied to all content on this page.
-                  </div>
-                \`;
-                
-                const style = document.createElement('style');
-                style.textContent = \`
-                  @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                  }
-                \`;
-                document.head.appendChild(style);
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                  notification.remove();
-                  style.remove();
-                }, 4000);
-              }
             `,
           }}
         />
@@ -732,10 +432,12 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           async
         />
       </head>
-      <body className="antialiased">
-        <LanguageProvider>
-          <main className="relative min-h-screen">{props.children}</main>
-        </LanguageProvider>
+      <body className="antialiased" suppressHydrationWarning>
+        <ErrorBoundary>
+          <ClientOnlyLanguageProvider>
+            <main className="relative min-h-screen">{props.children}</main>
+          </ClientOnlyLanguageProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

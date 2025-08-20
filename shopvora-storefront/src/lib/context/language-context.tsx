@@ -8,6 +8,7 @@ interface LanguageContextType {
   setLanguage: (language: Language) => void
   triggerBrowserTranslation: (language: Language, showNotification?: boolean) => void
   detectBrowserLanguage: () => Language
+  isMounted: boolean
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
@@ -16,37 +17,62 @@ interface LanguageProviderProps {
   children: ReactNode
 }
 
-export const LanguageProvider = ({ children }: LanguageProviderProps) => {
-  const [language, setLanguageState] = useState<Language>('en')
+// Client-side only wrapper to prevent hydration issues
+function ClientOnly({ children }: { children: ReactNode }) {
+  const [hasMounted, setHasMounted] = useState(false)
 
   useEffect(() => {
-    // Load language preference from localStorage on mount
-    const savedLanguage = localStorage.getItem('shopvora-language') as Language
-    if (savedLanguage && ['en', 'hi', 'gu', 'mr', 'ta', 'te'].includes(savedLanguage)) {
-      setLanguageState(savedLanguage)
-      // Use the enhanced browser translation function
-      if (typeof window !== 'undefined' && (window as any).shopvoraTranslation) {
-        setTimeout(() => {
-          (window as any).shopvoraTranslation.enableTranslation(savedLanguage, false)
-        }, 500)
-      }
-    } else {
-      // Auto-detect browser language if no saved preference
-      const detectedLang = detectBrowserLanguage()
-      if (detectedLang !== 'en') {
-        setLanguageState(detectedLang)
-        // Show language detection prompt
-        setTimeout(() => {
-          if (typeof window !== 'undefined' && (window as any).shopvoraTranslation) {
-            (window as any).shopvoraTranslation.showLanguageDetectionPrompt(detectedLang)
-          }
-        }, 2000)
+    setHasMounted(true)
+  }, [])
+
+  if (!hasMounted) {
+    return null
+  }
+
+  return <>{children}</>
+}
+
+export const LanguageProvider = ({ children }: LanguageProviderProps) => {
+  const [language, setLanguageState] = useState<Language>('en')
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+    
+    // Only run client-side code after component is mounted
+    if (typeof window !== 'undefined') {
+      // Load language preference from localStorage on mount
+      const savedLanguage = localStorage.getItem('shopvora-language') as Language
+      if (savedLanguage && ['en', 'hi', 'gu', 'mr', 'ta', 'te'].includes(savedLanguage)) {
+        setLanguageState(savedLanguage)
+        // Use the enhanced browser translation function
+        if ((window as any).shopvoraTranslation) {
+          setTimeout(() => {
+            (window as any).shopvoraTranslation.enableTranslation(savedLanguage, false)
+          }, 500)
+        }
+      } else {
+        // Auto-detect browser language if no saved preference
+        const detectedLang = detectBrowserLanguage()
+        if (detectedLang !== 'en') {
+          setLanguageState(detectedLang)
+          // Show language detection prompt
+          setTimeout(() => {
+            if ((window as any).shopvoraTranslation) {
+              (window as any).shopvoraTranslation.showLanguageDetectionPrompt(detectedLang)
+            }
+          }, 2000)
+        }
       }
     }
   }, [])
 
   const detectBrowserLanguage = (): Language => {
-    if (typeof window !== 'undefined' && (window as any).shopvoraTranslation) {
+    if (typeof window === 'undefined') {
+      return 'en'
+    }
+    
+    if ((window as any).shopvoraTranslation) {
       return (window as any).shopvoraTranslation.detectBrowserLanguage()
     }
     
@@ -134,121 +160,71 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
       'eml': 'hi', // Emiliano-Romagnolo -> Hindi
       'nap': 'hi', // Neapolitan -> Hindi
       'scn': 'hi', // Sicilian -> Hindi
+      'it-it': 'hi', // Italian (Italy) -> Hindi
+      'it-ch': 'hi', // Italian (Switzerland) -> Hindi
+      'de-de': 'hi', // German (Germany) -> Hindi
+      'de-at': 'hi', // German (Austria) -> Hindi
+      'de-ch': 'hi', // German (Switzerland) -> Hindi
+      'de-li': 'hi', // German (Liechtenstein) -> Hindi
+      'de-lu': 'hi', // German (Luxembourg) -> Hindi
+      'fr-fr': 'hi', // French (France) -> Hindi
+      'fr-be': 'hi', // French (Belgium) -> Hindi
+      'fr-ca': 'hi', // French (Canada) -> Hindi
+      'fr-ch': 'hi', // French (Switzerland) -> Hindi
+      'fr-lu': 'hi', // French (Luxembourg) -> Hindi
+      'fr-mc': 'hi', // French (Monaco) -> Hindi
+      'es-es': 'hi', // Spanish (Spain) -> Hindi
+      'es-mx': 'hi', // Spanish (Mexico) -> Hindi
+      'es-gt': 'hi', // Spanish (Guatemala) -> Hindi
+      'es-cr': 'hi', // Spanish (Costa Rica) -> Hindi
+      'es-pa': 'hi', // Spanish (Panama) -> Hindi
+      'es-do': 'hi', // Spanish (Dominican Republic) -> Hindi
+      'es-ve': 'hi', // Spanish (Venezuela) -> Hindi
+      'es-co': 'hi', // Spanish (Colombia) -> Hindi
+      'es-pe': 'hi', // Spanish (Peru) -> Hindi
+      'es-ar': 'hi', // Spanish (Argentina) -> Hindi
+      'es-cl': 'hi', // Spanish (Chile) -> Hindi
+      'es-ec': 'hi', // Spanish (Ecuador) -> Hindi
+      'es-br': 'hi', // Spanish (Brazil) -> Hindi
+      'es-py': 'hi', // Spanish (Paraguay) -> Hindi
+      'es-uy': 'hi', // Spanish (Uruguay) -> Hindi
+      'es-bo': 'hi', // Spanish (Bolivia) -> Hindi
+      'es-hn': 'hi', // Spanish (Honduras) -> Hindi
+      'es-sv': 'hi', // Spanish (El Salvador) -> Hindi
+      'es-ni': 'hi', // Spanish (Nicaragua) -> Hindi
+      'es-pr': 'hi', // Spanish (Puerto Rico) -> Hindi
+      'es-cu': 'hi', // Spanish (Cuba) -> Hindi
+      'es-gq': 'hi', // Spanish (Equatorial Guinea) -> Hindi
+      'pt-pt': 'hi', // Portuguese (Portugal) -> Hindi
+      'pt-br': 'hi', // Portuguese (Brazil) -> Hindi
+      'pt-ao': 'hi', // Portuguese (Angola) -> Hindi
+      'pt-mz': 'hi', // Portuguese (Mozambique) -> Hindi
+      'pt-cv': 'hi', // Portuguese (Cape Verde) -> Hindi
+      'pt-gw': 'hi', // Portuguese (Guinea-Bissau) -> Hindi
+      'pt-st': 'hi', // Portuguese (São Tomé and Príncipe) -> Hindi
+      'pt-tl': 'hi', // Portuguese (East Timor) -> Hindi
+      'pt-mo': 'hi', // Portuguese (Macau) -> Hindi
       'en': 'en' // English stays English
     }
     
     return languageMap[langCode] || 'en'
   }
 
-  const triggerBrowserTranslation = (newLanguage: Language, showNotification: boolean = true) => {
-    // Use the enhanced browser translation function if available
-    if (typeof window !== 'undefined' && (window as any).shopvoraTranslation) {
-      (window as any).shopvoraTranslation.enableTranslation(newLanguage, showNotification)
-    } else if (typeof window !== 'undefined' && (window as any).enableBrowserTranslation) {
-      // Fallback to old function
-      (window as any).enableBrowserTranslation(newLanguage, showNotification)
-    } else {
-      // Fallback implementation if global function is not available
-      console.log('Translation function not available, using fallback')
-      
-      // Set the document language attribute to trigger browser translation
-      document.documentElement.lang = newLanguage
-      document.documentElement.setAttribute('lang', newLanguage)
-      
-      // Remove notranslate meta tag to allow translation
-      let metaTag = document.querySelector('meta[name="google"]')
-      if (metaTag) {
-        metaTag.remove()
-      }
-      
-      // Store the language preference
-      localStorage.setItem('shopvora-language', newLanguage)
-      
-      // Trigger browser translation for non-English languages
-      if (newLanguage !== 'en') {
-        // Force browser to detect language change
-        const event = new Event('languagechange')
-        window.dispatchEvent(event)
-        
-        // Add a small delay to ensure browser picks up the change
-        setTimeout(() => {
-          // Try to trigger translation by changing page title temporarily
-          const originalTitle = document.title
-          document.title = `Translated - ${originalTitle}`
-          setTimeout(() => {
-            document.title = originalTitle
-          }, 100)
-          
-          // Also try to trigger by changing a meta tag
-          const langMeta = document.querySelector('meta[http-equiv="content-language"]')
-          if (langMeta) {
-            langMeta.setAttribute('content', newLanguage)
-          } else {
-            const newLangMeta = document.createElement('meta')
-            newLangMeta.setAttribute('http-equiv', 'content-language')
-            newLangMeta.setAttribute('content', newLanguage)
-            document.head.appendChild(newLangMeta)
-          }
-        }, 200)
-      }
-      
-      // Show notification only if requested (not on page load)
-      if (showNotification) {
-        const languageNames: Record<Language, string> = {
-          en: "English",
-          hi: "Hindi", 
-          gu: "Gujarati",
-          mr: "Marathi",
-          ta: "Tamil",
-          te: "Telugu"
-        }
-        
-        // Create a temporary notification
-        const notification = document.createElement('div')
-        notification.style.cssText = `
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background: #10b981;
-          color: white;
-          padding: 16px 20px;
-          border-radius: 8px;
-          z-index: 9999;
-          font-family: system-ui, sans-serif;
-          font-size: 14px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          animation: slideIn 0.3s ease-out;
-          max-width: 350px;
-          line-height: 1.4;
-        `
-        notification.innerHTML = `
-          <div style="font-weight: 600; margin-bottom: 8px;">Language Changed to ${languageNames[newLanguage]}</div>
-          <div style="margin-bottom: 8px;">If translation doesn't appear automatically:</div>
-          <div style="font-size: 12px;">
-            1. Right-click on the page<br>
-            2. Select "Translate to ${languageNames[newLanguage]}"<br>
-            3. Or use your browser's translate button
-          </div>
-        `
-        
-        // Add animation styles
-        const style = document.createElement('style')
-        style.textContent = `
-          @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-          }
-        `
-        document.head.appendChild(style)
-        
-        document.body.appendChild(notification)
-        
-        // Remove notification after 5 seconds
-        setTimeout(() => {
-          notification.remove()
-          style.remove()
-        }, 5000)
-      }
+  const triggerBrowserTranslation = (newLanguage: Language, showNotification = false) => {
+    if (typeof window === 'undefined') return
+    
+    // Store language preference
+    localStorage.setItem('shopvora-language', newLanguage)
+    
+    // Update document language
+    document.documentElement.lang = newLanguage
+    document.documentElement.setAttribute('lang', newLanguage)
+    
+    // Trigger browser translation for non-English languages
+    if (newLanguage !== 'en' && (window as any).shopvoraTranslation) {
+      setTimeout(() => {
+        (window as any).shopvoraTranslation.enableTranslation(newLanguage, showNotification)
+      }, 5000)
     }
   }
 
@@ -258,9 +234,11 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, triggerBrowserTranslation, detectBrowserLanguage }}>
-      {children}
-    </LanguageContext.Provider>
+    <ClientOnly>
+      <LanguageContext.Provider value={{ language, setLanguage, triggerBrowserTranslation, detectBrowserLanguage, isMounted }}>
+        {children}
+      </LanguageContext.Provider>
+    </ClientOnly>
   )
 }
 

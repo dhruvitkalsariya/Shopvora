@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { motion, AnimatePresence, PanInfo } from "framer-motion"
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react"
 import { useCarousel } from "@lib/hooks/use-carousel"
@@ -95,6 +95,28 @@ export default function EnhancedCarousel({
 
   const currentSlideData = slides[currentSlide]
 
+  // Generate random positions for confetti and circles only on client side
+  const [confettiPositions, setConfettiPositions] = useState<Array<{left: string, top: string}>>([])
+  const [circlePositions, setCirclePositions] = useState<Array<{left: string, top: string, width: string, height: string}>>([])
+
+  useEffect(() => {
+    // Generate confetti positions
+    const confetti = [...Array(8)].map(() => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+    }))
+    setConfettiPositions(confetti)
+
+    // Generate circle positions
+    const circles = [...Array(5)].map(() => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      width: `${20 + Math.random() * 30}px`,
+      height: `${20 + Math.random() * 30}px`,
+    }))
+    setCirclePositions(circles)
+  }, [])
+
   return (
     <div
       ref={containerRef}
@@ -164,45 +186,45 @@ export default function EnhancedCarousel({
               </div>
 
               {/* Confetti-like elements */}
-              {[...Array(8)].map((_, i) => (
+              {confettiPositions.map((pos, i) => (
                 <motion.div
                   key={i}
                   className="absolute w-2 h-2 bg-yellow-400/60 rounded-full"
                   style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
+                    left: pos.left,
+                    top: pos.top,
                   }}
                   animate={{
                     y: [0, -20, 0],
                     opacity: [0.6, 1, 0.6],
                   }}
                   transition={{
-                    duration: 2 + Math.random() * 2,
+                    duration: 2 + (i * 0.3),
                     repeat: Infinity,
-                    delay: Math.random() * 2,
+                    delay: i * 0.2,
                   }}
                 />
               ))}
 
               {/* White circular outlines */}
-              {[...Array(5)].map((_, i) => (
+              {circlePositions.map((pos, i) => (
                 <motion.div
                   key={i}
                   className="absolute border border-white/20 rounded-full"
                   style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    width: `${20 + Math.random() * 30}px`,
-                    height: `${20 + Math.random() * 30}px`,
+                    left: pos.left,
+                    top: pos.top,
+                    width: pos.width,
+                    height: pos.height,
                   }}
                   animate={{
                     scale: [1, 1.2, 1],
                     opacity: [0.2, 0.4, 0.2],
                   }}
                   transition={{
-                    duration: 3 + Math.random() * 2,
+                    duration: 3 + (i * 0.4),
                     repeat: Infinity,
-                    delay: Math.random() * 3,
+                    delay: i * 0.5,
                   }}
                 />
               ))}
