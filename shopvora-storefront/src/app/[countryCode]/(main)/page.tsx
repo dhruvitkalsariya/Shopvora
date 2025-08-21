@@ -6,6 +6,8 @@ import PopularProducts from "@modules/home/components/popular-products"
 import HeroBanner from "@modules/home/components/hero/hero-banner"
 import ExploreNewCollection from "@modules/home/components/explore-new-collection"
 import { getRegion } from "@lib/data/regions"
+import TopDeals from "@modules/home/components/top-deals"
+import RecentlyViewed from "@modules/home/components/recently-viewed"
 
 export const metadata: Metadata = {
   title: "Shopvora - Your Ultimate Shopping Destination",
@@ -35,6 +37,9 @@ export default async function Home(props: {
       <PopularProducts />
       <HeroBanner/>     
       <ExploreNewCollection />
+      <TopDeals />
+      {/* Recently Viewed Section - Only for logged in users */}
+      <RecentlyViewed />
     </>
   )
 }

@@ -4,9 +4,11 @@ import { motion } from "framer-motion"
 import { ArrowRight, Heart, Eye, ShoppingCart, Star } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useCustomer } from "@lib/hooks/use-customer"
 
-const popularProducts = [
+// Sample recently viewed products data
+const recentlyViewedProducts = [
   {
     id: 1,
     name: "Laptop Intel Core i7",
@@ -20,28 +22,30 @@ const popularProducts = [
     href: "/products/laptop-intel-core",
     isNew: false,
     discount: 4,
-    inStock: true
+    inStock: true,
+    viewedAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
   },
   {
     id: 2,
-    name: "Samsung Galaxy Z Fold",
+    name: "Samsung Galaxy Z Flip",
     category: "SMARTPHONE",
-    description: "Revolutionary foldable smartphone with 7.6-inch display. Experience the future of mobile technology.",
-    currentPrice: "Rs.89,999",
-    originalPrice: "Rs.95,999",
-    rating: 4.8,
-    reviewCount: 450,
+    description: "Revolutionary foldable smartphone with compact design. Experience the future of mobile technology in your pocket.",
+    currentPrice: "Rs.79,999",
+    originalPrice: "Rs.85,999",
+    rating: 4.7,
+    reviewCount: 280,
     image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop",
-    href: "/products/samsung-galaxy-z-series",
+    href: "/products/samsung-galaxy-z-flip",
     isNew: true,
-    discount: 6,
-    inStock: true
+    discount: 7,
+    inStock: true,
+    viewedAt: new Date(Date.now() - 4 * 60 * 60 * 1000) // 4 hours ago
   },
   {
     id: 3,
     name: "ASUS ROG Gaming Laptop",
     category: "LAPTOP & PC",
-    description: "Gaming laptop with AMD Ryzen processor and RTX graphics. Built for ultimate gaming performance.",
+    description: "Gaming laptop with AMD Ryzen processor and RTX graphics. Built for ultimate gaming performance and multitasking.",
     currentPrice: "Rs.65,999",
     originalPrice: "Rs.69,999",
     rating: 4.3,
@@ -50,13 +54,14 @@ const popularProducts = [
     href: "/products/laptop-asus-amd-ryzen",
     isNew: false,
     discount: 6,
-    inStock: false
+    inStock: false,
+    viewedAt: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago
   },
   {
     id: 4,
-    name: "Organic Face Cream",
+    name: "Boots Cream",
     category: "BEAUTY & SKINCARE",
-    description: "Natural organic face cream with vitamin E and aloe vera. Nourishes and hydrates your skin.",
+    description: "Natural organic face cream with vitamin E and aloe vera. Nourishes and hydrates your skin for a healthy glow.",
     currentPrice: "Rs.1,299",
     originalPrice: "Rs.1,599",
     rating: 4.2,
@@ -65,12 +70,40 @@ const popularProducts = [
     href: "/products/boots-cream",
     isNew: false,
     discount: 19,
-    inStock: true
+    inStock: true,
+    viewedAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
+  },
+  {
+    id: 5,
+    name: "LAPTOP ASUS AMD RYZEN",
+    category: "LAPTOP & PC",
+    description: "Powerful laptop with AMD Ryzen processor, perfect for both work and entertainment. Features high-speed performance.",
+    currentPrice: "Rs.45,999",
+    originalPrice: "Rs.49,999",
+    rating: 4.4,
+    reviewCount: 190,
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop",
+    href: "/products/laptop-asus-amd-ryzen",
+    isNew: false,
+    discount: 8,
+    inStock: true,
+    viewedAt: new Date(Date.now() - 12 * 60 * 60 * 1000) // 12 hours ago
   }
 ]
 
-const PopularProducts = () => {
+const RecentlyViewed = () => {
+  const { isLoggedIn, isLoading } = useCustomer()
   const [wishlist, setWishlist] = useState<number[]>([])
+  const [isVisible, setIsVisible] = useState(false)
+
+  // Check if user is logged in and has recently viewed products
+  useEffect(() => {
+    if (isLoggedIn && recentlyViewedProducts.length > 0) {
+      setIsVisible(true)
+    } else {
+      setIsVisible(false)
+    }
+  }, [isLoggedIn])
 
   const toggleWishlist = (productId: number) => {
     setWishlist(prev => 
@@ -142,40 +175,73 @@ const PopularProducts = () => {
     }
   }
 
+  const titleVariants = {
+    hidden: { opacity: 0, y: -50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8
+      }
+    }
+  }
+
+  // Don't render if user is not logged in or no recently viewed products
+  if (isLoading) {
+    return null // Show loading state
+  }
+
+  if (!isVisible) {
+    return null
+  }
+
   return (
-    <section className="py-6 md:py-8 lg:py-10 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+    <section 
+      className="w-full py-16 sm:px-4 md:px-8"
+      style={{
+        backgroundColor: 'rgba(219, 208, 253, 0.4)' // DBD0FD with 40% opacity - same as Explore New Collection
+      }}
+    >
+      <div className="w-full mx-auto">
+        {/* Header Section - Same as Explore New Collection */}
         <motion.div
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+          variants={titleVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-10"
         >
-          <div className="mb-4 sm:mb-0">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
-              Popular Products
-            </h2>
-          </div>
+          <motion.h2
+            className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-0"
+            style={{
+              background: 'linear-gradient(135deg, #2A1454 0%, #6B46C1 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
+          >
+            Recently Viewed
+          </motion.h2>    
+
+          {/* See All Recently Viewed Link */}
           <LocalizedClientLink
-            href="/products"
+            href="/account/recently-viewed"
             className="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium transition-colors duration-300 group"
           >
-            <span>See All</span>
-            <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-300" />
+            <span className="mr-2">See All </span>
+            <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </LocalizedClientLink>
         </motion.div>
 
-        {/* Products Grid */}
+        {/* Products Grid - Same card structure as Popular Products */}
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8"
         >
-          {popularProducts.map((product) => (
+          {recentlyViewedProducts.map((product) => (
             <motion.div
               key={product.id}
               variants={itemVariants}
@@ -295,6 +361,11 @@ const PopularProducts = () => {
                       Out of Stock
                     </div>
                   )}
+
+                  {/* Recently Viewed Badge */}
+                  <div className="absolute bottom-4 right-4 bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
+                    Recently Viewed
+                  </div>
                 </div>
                 
                 {/* Product Info */}
@@ -362,10 +433,10 @@ const PopularProducts = () => {
               </motion.div>
             </motion.div>
           ))}
-        </motion.div>
+        </motion.div>        
       </div>
     </section>
   )
 }
 
-export default PopularProducts 
+export default RecentlyViewed 

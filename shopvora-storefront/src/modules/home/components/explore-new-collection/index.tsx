@@ -255,7 +255,7 @@ export default function ExploreNewCollection() {
             href="/collections"
             className="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium transition-colors duration-300 group"
           >
-            <span className="mr-2">See All Collections</span>
+            <span className="mr-2">See All </span>
             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </LocalizedClientLink>
         </motion.div>

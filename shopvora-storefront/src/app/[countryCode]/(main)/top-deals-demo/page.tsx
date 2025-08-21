@@ -1,69 +1,136 @@
 "use client"
 
-import TopDeals from "@modules/home/components/top-deals"
+import { Header, Footer, TopDealsSection } from "@modules/common/components/ui"
 
 export default function TopDealsDemo() {
+  // Data matching the screenshot exactly
+  const topDealsData = [
+    {
+      id: 1,
+      title: "iPhone 15 Pro Max",
+      category: "Electronics",
+      dealTag: "HOT DEAL" as const,
+      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      href: "/category/electronics",
+      discountText: "Up To 40% OFF",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-200"
+    },
+    {
+      id: 2,
+      title: "MacBook Pro M3",
+      category: "Electronics",
+      dealTag: "BEST SELLER" as const,
+      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      href: "/category/electronics",
+      discountText: "30-50% OFF",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-200"
+    },
+    {
+      id: 3,
+      title: "Nike Air Max 270",
+      category: "Shoes",
+      dealTag: "FLASH SALE" as const,
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      href: "/category/shoes",
+      discountText: "25-45% OFF",
+      bgColor: "bg-green-50",
+      borderColor: "border-green-200"
+    },
+    {
+      id: 4,
+      title: "Designer Kurta Set",
+      category: "Women's Clothing",
+      dealTag: "TRENDING" as const,
+      image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      href: "/category/womens-clothing",
+      discountText: "Up To 70% OFF",
+      bgColor: "bg-pink-50",
+      borderColor: "border-pink-200"
+    },
+    {
+      id: 5,
+      title: "Branded Sari Collection",
+      category: "Women's Clothing",
+      dealTag: "LIMITED TIME" as const,
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      href: "/category/womens-clothing",
+      discountText: "20-60% OFF",
+      bgColor: "bg-pink-50",
+      borderColor: "border-pink-200"
+    }
+  ]
+
+  const categories = [
+    {
+      name: "Electronics",
+      href: "/categories/electronics",
+      subcategories: [
+        { name: "Smartphones", href: "/categories/electronics/smartphones" },
+        { name: "Laptops", href: "/categories/electronics/laptops" },
+        { name: "Tablets", href: "/categories/electronics/tablets" },
+        { name: "Audio", href: "/categories/electronics/audio" }
+      ]
+    },
+    {
+      name: "Fashion",
+      href: "/categories/fashion",
+      subcategories: [
+        { name: "Men's Clothing", href: "/categories/fashion/mens" },
+        { name: "Women's Clothing", href: "/categories/fashion/womens" },
+        { name: "Shoes", href: "/categories/fashion/shoes" },
+        { name: "Accessories", href: "/categories/fashion/accessories" }
+      ]
+    },
+    {
+      name: "Home & Garden",
+      href: "/categories/home-garden",
+      subcategories: [
+        { name: "Furniture", href: "/categories/home-garden/furniture" },
+        { name: "Decor", href: "/categories/home-garden/decor" },
+        { name: "Kitchen", href: "/categories/home-garden/kitchen" },
+        { name: "Garden", href: "/categories/home-garden/garden" }
+      ]
+    }
+  ]
+
+  const handleSearch = (query: string) => {
+    console.log("Search query:", query)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
+      {/* Header */}
+      <Header
+        categories={categories}
+        onSearch={handleSearch}
+        onCartClick={() => console.log("Cart clicked")}
+        onUserMenuClick={() => console.log("User menu clicked")}
+        onNotificationClick={() => console.log("Notifications clicked")}
+      />
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Top Deals Component Demo
+            Top Deals Demo
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            This is a demonstration of the Top Deals component based on the Figma design. 
-            The component features attractive animations, hover effects, and responsive design.
+          <p className="text-lg text-gray-600">
+            Replicating the exact Top Deals section from the screenshot
           </p>
         </div>
+
+        {/* Top Deals Section */}
+        <TopDealsSection
+          title="Top Deals"
+          seeAllUrl="/collections/top-deals"
+          deals={topDealsData}
+        />
       </div>
-      
-      <TopDeals />
-      
-      <div className="container mx-auto px-4 py-16">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Component Features
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="p-4 bg-purple-50 rounded-lg">
-              <h3 className="font-semibold text-purple-900 mb-2">Smooth Animations</h3>
-              <p className="text-purple-700 text-sm">
-                Framer Motion animations with staggered children and hover effects
-              </p>
-            </div>
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-2">Responsive Design</h3>
-              <p className="text-blue-700 text-sm">
-                Fully responsive grid layout that adapts to different screen sizes
-              </p>
-            </div>
-            <div className="p-4 bg-green-50 rounded-lg">
-              <h3 className="font-semibold text-green-900 mb-2">Interactive Elements</h3>
-              <p className="text-green-700 text-sm">
-                Hover effects, scale animations, and smooth transitions
-              </p>
-            </div>
-            <div className="p-4 bg-orange-50 rounded-lg">
-              <h3 className="font-semibold text-orange-900 mb-2">Discount Badges</h3>
-              <p className="text-orange-700 text-sm">
-                Eye-catching discount badges with rotation and glow effects
-              </p>
-            </div>
-            <div className="p-4 bg-pink-50 rounded-lg">
-              <h3 className="font-semibold text-pink-900 mb-2">Image Optimization</h3>
-              <p className="text-pink-700 text-sm">
-                Next.js Image component with fallback images and lazy loading
-              </p>
-            </div>
-            <div className="p-4 bg-indigo-50 rounded-lg">
-              <h3 className="font-semibold text-indigo-900 mb-2">Accessibility</h3>
-              <p className="text-indigo-700 text-sm">
-                Proper alt texts, semantic HTML, and keyboard navigation support
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   )
 } 

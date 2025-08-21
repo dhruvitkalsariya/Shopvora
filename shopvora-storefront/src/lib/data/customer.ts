@@ -108,21 +108,29 @@ export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
 
+  console.log("Attempting login with:", { email, password })
+
   try {
-    await sdk.auth
-      .login("customer", "emailpass", { email, password })
-      .then(async (token) => {
-        await setAuthToken(token as string)
-        const customerCacheTag = await getCacheTag("customers")
-        revalidateTag(customerCacheTag)
-      })
+    const token = await sdk.auth.login("customer", "emailpass", { email, password })
+    console.log("Login successful, token received")
+    
+    await setAuthToken(token as string)
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag)
   } catch (error: any) {
-    return error.toString()
+    console.error("Login error:", error)
+    console.error("Error details:", {
+      message: error.message,
+      status: error.status,
+      response: error.response
+    })
+    return `Login failed: ${error.message || error.toString()}`
   }
 
   try {
     await transferCart()
   } catch (error: any) {
+    console.error("Cart transfer error:", error)
     return error.toString()
   }
 }

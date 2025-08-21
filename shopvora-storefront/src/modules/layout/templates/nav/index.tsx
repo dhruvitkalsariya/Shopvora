@@ -152,17 +152,30 @@ export default function Nav() {
     setMounted(true)
   }, [])
 
-  // Handle clicks outside menu to close it
+  // Handle clicks outside navigation categories to close menus
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
       
-      if (menuRef.current && !menuRef.current.contains(target)) {
-        setActiveCategory(null)
-        setActiveSubcategory(null)
-        setClickedCategory(null)
-        setClickedSubcategory(null)
-        setIsMobileMenuOpen(false)
+      // Check if click is outside the categories navigation area
+      if (categoriesNavRef.current && !categoriesNavRef.current.contains(target)) {
+        // Also check if click is outside any dropdown menus
+        const dropdownMenus = document.querySelectorAll('.nav-dropdown, .nav-submenu')
+        let isClickingDropdown = false
+        
+        dropdownMenus.forEach(menu => {
+          if (menu.contains(target)) {
+            isClickingDropdown = true
+          }
+        })
+        
+        if (!isClickingDropdown) {
+          setActiveCategory(null)
+          setActiveSubcategory(null)
+          setClickedCategory(null)
+          setClickedSubcategory(null)
+          setIsMobileMenuOpen(false)
+        }
       }
     }
 
@@ -184,10 +197,7 @@ export default function Nav() {
     return () => window.removeEventListener('popstate', handleRouteChange)
   }, [])
 
-  // Debug state changes
-  useEffect(() => {
-    console.log('State changed - Active subcategory:', activeSubcategory, 'Clicked subcategory:', clickedSubcategory)
-  }, [activeSubcategory, clickedSubcategory])
+
 
   const handleCategoryClick = (categoryName: string, event: React.MouseEvent) => {
     event.stopPropagation()
@@ -198,14 +208,12 @@ export default function Nav() {
       setActiveCategory(null)
       setActiveSubcategory(null)
       setClickedSubcategory(null)
-      console.log('Category closed:', categoryName)
     } else {
       // Open the category and reset subcategory states
       setClickedCategory(categoryName)
       setActiveCategory(categoryName)
       setActiveSubcategory(null)
       setClickedSubcategory(null)
-      console.log('Category opened:', categoryName)
     }
   }
 
@@ -233,8 +241,6 @@ export default function Nav() {
       setClickedSubcategory(subcategoryName)
       setActiveSubcategory(subcategoryName)
     }
-    
-    console.log('Subcategory clicked:', subcategoryName, 'Current clicked:', clickedSubcategory, 'Will be:', clickedSubcategory === subcategoryName ? null : subcategoryName)
   }
 
   const handleSubcategoryHover = (subcategoryName: string) => {
@@ -242,7 +248,6 @@ export default function Nav() {
     if (clickedSubcategory === null) {
       setActiveSubcategory(subcategoryName)
     }
-    console.log('Subcategory hover:', subcategoryName, 'Active subcategory:', subcategoryName, 'Clicked subcategory:', clickedSubcategory)
   }
 
   const handleSubcategoryLeave = () => {
@@ -387,7 +392,7 @@ export default function Nav() {
         <div className="border-t border-gray-200" />
 
         {/* Row 2: Categories NAV (CONTAINER WIDTH) */}
-        <nav ref={categoriesNavRef} className="nav-container px-4 sm:px-6 lg:px-8">
+        <nav ref={categoriesNavRef} className="nav-container px-4 sm:px-6 lg:px-8" onClick={(e) => e.stopPropagation()}>
           <div className="nav-categories flex justify-evenly mx-[120px]">
             {categories.map((category) => (
                               <div
@@ -418,7 +423,7 @@ export default function Nav() {
 
                 {/* Desktop Mega Menu */}
                 {category.subcategories && (activeCategory === category.name || clickedCategory === category.name) && (
-                  <div className="hidden lg:block nav-dropdown w-60">
+                  <div className="hidden lg:block nav-dropdown w-60" onClick={(e) => e.stopPropagation()}>
                     <div className="grid grid-cols-1">
                       {category.subcategories.map((subcategory) => (
                         <div
@@ -447,7 +452,7 @@ export default function Nav() {
 
                           {/* Submenu */}
                           {subcategory.items && (activeSubcategory === subcategory.name || clickedSubcategory === subcategory.name) && (
-                            <div className="nav-submenu w-64">
+                            <div className="nav-submenu w-64" onClick={(e) => e.stopPropagation()}>
                               <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-100">
                                 More In {subcategory.name}
                               </div>

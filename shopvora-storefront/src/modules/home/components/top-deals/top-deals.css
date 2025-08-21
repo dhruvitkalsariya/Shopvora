@@ -3,6 +3,7 @@
 .top-deals-card {
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .top-deals-card::before {
@@ -14,34 +15,17 @@
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   transition: left 0.5s;
+  z-index: 1;
 }
 
 .top-deals-card:hover::before {
   left: 100%;
 }
 
-/* Custom scrollbar for horizontal scroll if needed */
-.top-deals-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #c084fc #f3f4f6;
-}
-
-.top-deals-scroll::-webkit-scrollbar {
-  height: 6px;
-}
-
-.top-deals-scroll::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 3px;
-}
-
-.top-deals-scroll::-webkit-scrollbar-thumb {
-  background: #c084fc;
-  border-radius: 3px;
-}
-
-.top-deals-scroll::-webkit-scrollbar-thumb:hover {
-  background: #a855f7;
+/* Enhanced hover effects */
+.top-deals-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(147, 51, 234, 0.15);
 }
 
 /* Pulse animation for discount badges */
@@ -80,16 +64,115 @@
   background-clip: text;
 }
 
-/* Responsive adjustments */
+/* Enhanced button hover effects */
+.shop-now-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.shop-now-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.shop-now-button:hover::before {
+  left: 100%;
+}
+
+/* Image hover effects */
+.product-image {
+  transition: transform 0.5s ease;
+}
+
+.product-image:hover {
+  transform: scale(1.05);
+}
+
+/* Rating badge animation */
+.rating-badge {
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Category badge animation */
+.category-badge {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Price animation */
+.price-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive grid adjustments */
 @media (max-width: 640px) {
   .top-deals-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .top-deals-card {
+    margin-bottom: 1rem;
   }
 }
 
 @media (max-width: 768px) {
   .top-deals-grid {
     gap: 1rem;
+  }
+  
+  .top-deals-card:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+@media (min-width: 1024px) {
+  .top-deals-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .top-deals-grid {
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
@@ -107,4 +190,86 @@
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
+}
+
+/* Enhanced section background */
+.top-deals-section {
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #fdf2f8 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.top-deals-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c084fc' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* Card shine effect */
+.card-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s ease;
+  z-index: 2;
+}
+
+.top-deals-card:hover .card-shine {
+  left: 100%;
+}
+
+/* Floating elements animation */
+.floating-element {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(180deg);
+  }
+}
+
+/* Enhanced button styles */
+.enhanced-button {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.enhanced-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+}
+
+.enhanced-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.enhanced-button:hover::before {
+  left: 100%;
 } 

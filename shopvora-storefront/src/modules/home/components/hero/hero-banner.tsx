@@ -48,7 +48,7 @@ export default function HeroBanner({ className = "" }: HeroBannerProps) {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-purple-600 mb-4 leading-tight"
             >
-              Product Name Will Be Here
+              Nike New Collection
             </motion.h1>
             
             {/* Description */}
@@ -58,7 +58,7 @@ export default function HeroBanner({ className = "" }: HeroBannerProps) {
               transition={{ delay: 0.3, duration: 0.6 }}
               className="text-base md:text-lg text-gray-600 mb-6 max-w-xl leading-relaxed"
             >
-              Lorem ipsum dolor sit amet consectetur. Ultrices nunc vitae rhoncus nisl. Orci vitae habitasse amet integer.
+                Best Selling Sneakers collection for men
             </motion.p>
             
             {/* Pricing */}
